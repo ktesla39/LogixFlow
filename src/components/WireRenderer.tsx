@@ -11,6 +11,9 @@ interface WireRendererProps {
   showWireExpressions?: boolean;
   onSelectWire: (wireId: string | null) => void;
   onDeleteWire: (wireId: string) => void;
+  onDoubleClickWire?: (wireId: string) => void;
+  onContextMenuWire?: (wireId: string, clientX: number, clientY: number) => void;
+  editingWireId?: string | null;
 }
 
 // Compute smooth filleted orthogonal path
@@ -78,7 +81,7 @@ function computeCurvedPath(x1: number, y1: number, x2: number, y2: number): stri
   return `M ${x1} ${y1} C ${x1 + loopOffset} ${y1}, ${x2 - loopOffset} ${y2}, ${x2} ${y2}`;
 }
 
-export const WireRenderer: React.FC<WireRendererProps> = ({
+const WireRendererBase: React.FC<WireRendererProps> = ({
   wires,
   nodes,
   selectedWireId,
@@ -88,6 +91,9 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
   showWireExpressions = false,
   onSelectWire,
   onDeleteWire,
+  onDoubleClickWire,
+  onContextMenuWire,
+  editingWireId,
 }) => {
   // Fast node lookup
   const nodeMap = React.useMemo(() => {
@@ -193,16 +199,29 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
         }
 
         return (
-          <g key={wire.id} className="wire-group cursor-pointer group">
+          <g key={wire.id} className="wire-group cursor-pointer group" pointerEvents="all">
             {/* Generous hit area for clicking/tapping */}
             <path
               d={pathData}
               fill="none"
               stroke="transparent"
-              strokeWidth="22"
+              strokeWidth="24"
+              pointerEvents="stroke"
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectWire(wire.id);
+              }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                onDoubleClickWire?.(wire.id);
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelectWire(wire.id);
+                onContextMenuWire?.(wire.id, e.clientX, e.clientY);
               }}
             />
 
@@ -232,6 +251,16 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectWire(wire.id);
+              }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                onDoubleClickWire?.(wire.id);
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelectWire(wire.id);
+                onContextMenuWire?.(wire.id, e.clientX, e.clientY);
               }}
             />
 
@@ -269,6 +298,122 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
               />
             </g>
 
+            {/* User-Defined Wire Net Label Display (Always visible when label exists) */}
+            {wire.label && wire.label.trim() && wire.id !== editingWireId && (() => {
+              const labelText = wire.label.trim();
+              const badgeWidth = Math.max(42, labelText.length * 7.5 + 24);
+              const halfW = badgeWidth / 2;
+              const hasExpression = Boolean(showWireExpressions || isSelected);
+              const labelY = hasExpression ? midY - 32 : midY - 16;
+
+              return (
+                <g
+                  transform={`translate(${midX}, ${labelY})`}
+                  className="cursor-pointer select-none filter drop-shadow-sm transition-transform hover:scale-105 group/wirelabel"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectWire(wire.id);
+                  }}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    onDoubleClickWire?.(wire.id);
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelectWire(wire.id);
+                    onContextMenuWire?.(wire.id, e.clientX, e.clientY);
+                  }}
+                >
+                  <title>{`Wire: ${labelText} (Double-click to rename)`}</title>
+                  {/* Background Tag Pill */}
+                  <rect
+                    x={-halfW}
+                    y="-11"
+                    width={badgeWidth}
+                    height="22"
+                    rx="6"
+                    fill={isDark ? '#090d16' : '#ffffff'}
+                    fillOpacity="0.96"
+                    stroke={
+                      isSelected
+                        ? selectedColor
+                        : isHigh
+                        ? highColor
+                        : isDark
+                        ? '#334155'
+                        : '#cbd5e1'
+                    }
+                    strokeWidth={isSelected ? '2' : isHigh ? '1.5' : '1'}
+                    className="transition-colors"
+                  />
+                  {/* Signal indicator dot */}
+                  <circle
+                    cx={-halfW + 9}
+                    cy="0"
+                    r="3.5"
+                    fill={isHigh ? (isDark ? '#38bdf8' : '#0284c7') : (isDark ? '#64748b' : '#94a3b8')}
+                  />
+                  {/* Wire Label Text */}
+                  <text
+                    x={4}
+                    y="3.5"
+                    textAnchor="middle"
+                    fill={
+                      isSelected
+                        ? (isDark ? '#38bdf8' : '#0284c7')
+                        : isHigh
+                        ? (isDark ? '#7dd3fc' : '#0369a1')
+                        : (isDark ? '#e2e8f0' : '#1e293b')
+                    }
+                    fontSize="11"
+                    fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+                    fontWeight="700"
+                    letterSpacing="0.02em"
+                  >
+                    {labelText}
+                  </text>
+                </g>
+              );
+            })()}
+
+            {/* Quick "+ Name" tag when wire is selected and has no label yet */}
+            {isSelected && !wire.label && wire.id !== editingWireId && (
+              <g
+                transform={`translate(${midX}, ${showWireExpressions ? midY - 32 : midY - 18})`}
+                className="cursor-pointer select-none transition-transform hover:scale-105"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDoubleClickWire?.(wire.id);
+                }}
+              >
+                <title>Double-click wire to name it</title>
+                <rect
+                  x="-38"
+                  y="-9"
+                  width="76"
+                  height="18"
+                  rx="9"
+                  fill={isDark ? '#0f172a' : '#ffffff'}
+                  fillOpacity="0.92"
+                  stroke={isDark ? '#38bdf8' : '#0284c7'}
+                  strokeWidth="1"
+                  strokeDasharray="2.5 2"
+                />
+                <text
+                  x="0"
+                  y="3"
+                  textAnchor="middle"
+                  fill={isDark ? '#38bdf8' : '#0284c7'}
+                  fontSize="9.5"
+                  fontFamily="sans-serif"
+                  fontWeight="600"
+                >
+                  + Name Wire
+                </text>
+              </g>
+            )}
+
             {/* Circuit Flow State Notation & Algebraic Formula Badge */}
             {(showWireExpressions || isSelected) && (() => {
               const labelText = wire.expression
@@ -276,9 +421,12 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
                 : (isHigh ? '1' : '0');
               const badgeWidth = Math.max(52, labelText.length * 7.5 + 24);
               const halfW = badgeWidth / 2;
+              const hasLabel = Boolean(wire.label && wire.label.trim());
+              const badgeY = hasLabel ? midY - 12 : midY - 18;
+
               return (
                 <g
-                  transform={`translate(${midX}, ${midY - 18})`}
+                  transform={`translate(${midX}, ${badgeY})`}
                   className="pointer-events-none select-none filter drop-shadow-sm"
                 >
                   <rect
@@ -317,17 +465,27 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
             {isSelected && (
               <g
                 transform={`translate(${midX}, ${midY})`}
-                className="cursor-pointer transition-opacity hover:opacity-90"
+                className="wire-delete-btn cursor-pointer transition-transform hover:scale-110 drop-shadow-md"
+                pointerEvents="all"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteWire(wire.id);
                 }}
               >
+                <title>Delete Wire</title>
+                {/* Generous invisible touch/click hit area */}
+                <circle r="18" fill="transparent" />
                 <circle r="11" fill="#ef4444" stroke="#ffffff" strokeWidth="2" />
                 <path
                   d="M -3.5 -3.5 L 3.5 3.5 M -3.5 3.5 L 3.5 -3.5"
                   stroke="#ffffff"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                 />
               </g>
@@ -403,3 +561,5 @@ export const WireRenderer: React.FC<WireRendererProps> = ({
     </g>
   );
 };
+
+export const WireRenderer = React.memo(WireRendererBase);

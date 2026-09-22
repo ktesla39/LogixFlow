@@ -34,12 +34,50 @@ export type OutputType =
   | 'SEVEN_SEG'
   | 'BUZZER';
 
+export type ElectricComponentType =
+  | 'ELEC_RESISTOR'
+  | 'ELEC_CAPACITOR'
+  | 'ELEC_INDUCTOR'
+  | 'ELEC_DIODE'
+  | 'ELEC_ZENER'
+  | 'ELEC_LED'
+  | 'ELEC_BATTERY'
+  | 'ELEC_GROUND'
+  | 'ELEC_AC_SOURCE'
+  | 'ELEC_NPN'
+  | 'ELEC_PNP'
+  | 'ELEC_POTENTIOMETER'
+  | 'ELEC_SWITCH'
+  | 'ELEC_VOLTMETER'
+  | 'ELEC_AMMETER'
+  | 'ELEC_OPAMP'
+  | 'ELEC_TRANSFORMER'
+  | 'ELEC_FUSE'
+  | 'ELEC_SPDT_SWITCH'
+  | 'ELEC_OHMMETER';
+
+export type FlowchartNodeType =
+  | 'FLOW_START'
+  | 'FLOW_END'
+  | 'FLOW_PROCESS'
+  | 'FLOW_DECISION'
+  | 'FLOW_INPUT'
+  | 'FLOW_OUTPUT'
+  | 'FLOW_CONNECTOR'
+  | 'FLOW_SUBROUTINE';
+
+export type CircuitMode = 'logic' | 'flowchart' | 'electric';
+
 export type NodeType =
   | GateType
   | FlipFlopType
   | CombinationalType
   | InputType
-  | OutputType;
+  | OutputType
+  | ElectricComponentType
+  | FlowchartNodeType
+  | 'SUBCIRCUIT'
+  | 'SUB_CIRCUIT';
 
 export interface Pin {
   id: string;
@@ -77,7 +115,64 @@ export interface CircuitNode {
     prevClk?: boolean;
     q?: boolean;
     qBar?: boolean;
+    // Flowchart specific execution state
+    flowAction?: string;
+    flowCondition?: string;
+    flowVarName?: string;
+    flowPrompt?: string;
+    flowValue?: string | number;
+    isFlowActive?: boolean;
+    // Electric circuit specific simulation state
+    resistance?: number;
+    resistanceOhms?: number;
+    capacitanceFarads?: number;
+    inductanceHenries?: number;
+    voltageVolts?: number;
+    currentAmps?: number;
+    forwardVoltageDrop?: number;
+    zenerBreakdownVoltage?: number;
+    isConducting?: boolean;
+    wiperPercent?: number;
+    potentiometerRatio?: number; // 0 to 1
+    measuredValue?: string;
+    opAmpGain?: number;
+    transformerRatio?: number;
+    fuseCurrentRating?: number;
+    isFuseBlown?: boolean;
+    switchPosition?: 'A' | 'B';
+    // Subcircuit packaging state
+    subcircuitSheetId?: string;
+    subcircuitName?: string;
+    subcircuitNodes?: CircuitNode[];
+    subcircuitWires?: Wire[];
+    subcircuitInputMap?: { pinId: string; internalNodeId: string; internalPinId: string }[];
+    subcircuitOutputMap?: { pinId: string; internalNodeId: string; internalPinId: string }[];
+    subCircuitDefId?: string;
+    subCircuitName?: string;
+    subCircuitDef?: SubCircuitDefinition;
+    subCircuitInternalNodes?: CircuitNode[];
+    subCircuitInternalWires?: Wire[];
+    isCollapsed?: boolean;
   };
+}
+
+export interface SubCircuitPinDefinition {
+  pinName: string;
+  internalNodeId: string;
+  internalPinId: string;
+  variableName?: string;
+}
+
+export interface SubCircuitDefinition {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  inputPins: SubCircuitPinDefinition[];
+  outputPins: SubCircuitPinDefinition[];
+  internalNodes: CircuitNode[];
+  internalWires: Wire[];
+  createdAt?: number;
 }
 
 export interface Wire {
@@ -88,11 +183,13 @@ export interface Wire {
   toPinId: string;
   value: boolean;
   expression?: string;
+  label?: string;
 }
 
 export interface Sheet {
   id: string;
   name: string;
+  circuitType?: CircuitMode;
   nodes: CircuitNode[];
   wires: Wire[];
   pan: { x: number; y: number };
@@ -103,9 +200,18 @@ export interface Sheet {
 export interface Project {
   id: string;
   name: string;
+  folderId?: string;
+  circuitType?: CircuitMode;
   description?: string;
   sheets: Sheet[];
   activeSheetId: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface DesignFolder {
+  id: string;
+  name: string;
   createdAt: number;
   updatedAt: number;
 }

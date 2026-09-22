@@ -11,6 +11,7 @@ interface NodeComponentProps {
   showVariables?: boolean;
   onSelect: (nodeId: string, e: React.MouseEvent | React.TouchEvent) => void;
   onInspect?: (nodeId: string) => void;
+  onContextMenuNode?: (nodeId: string, clientX: number, clientY: number) => void;
   onDelete: (nodeId: string) => void;
   onStartWire: (pin: Pin, e: React.MouseEvent | React.TouchEvent) => void;
   onEndWire: (pin: Pin, e: React.MouseEvent | React.TouchEvent) => void;
@@ -20,13 +21,14 @@ interface NodeComponentProps {
   onUpdateLabel?: (nodeId: string, newLabel: string) => void;
 }
 
-export const NodeComponent: React.FC<NodeComponentProps> = ({
+const NodeComponentBase: React.FC<NodeComponentProps> = ({
   node,
   isSelected,
   theme = 'light',
   showVariables = true,
   onSelect,
   onInspect,
+  onContextMenuNode,
   onStartWire,
   onEndWire,
   onToggleSwitch,
@@ -45,9 +47,9 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       ? true
       : node.type === 'LOW_CONST'
       ? false
-      : node.type === 'SWITCH' || node.type === 'BUTTON'
+      : node.type === 'SWITCH' || node.type === 'BUTTON' || node.type === 'ELEC_SWITCH' || node.type === 'ELEC_BATTERY'
       ? Boolean(node.state?.isOn)
-      : node.type === 'LED' || node.type === 'PROBE' || node.type === 'BUZZER'
+      : node.type === 'LED' || node.type === 'PROBE' || node.type === 'BUZZER' || node.type === 'ELEC_LED'
       ? Boolean(node.inputs[0]?.value)
       : Boolean(node.outputs[0]?.value);
 
@@ -125,7 +127,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           <div
             className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 group-hover:scale-125 ${
               isHigh
-                ? 'bg-sky-400 border-sky-600 shadow-[0_0_6px_rgba(2,132,199,0.8)] ring-1 ring-sky-300'
+                ? 'bg-sky-400 border-sky-600'
                 : 'bg-white border-slate-900 group-hover:border-sky-500'
             }`}
           />
@@ -148,9 +150,16 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   };
 
   const handleComponentClick = (e: React.MouseEvent) => {
-    if (node.type === 'SWITCH') {
+    if (node.type === 'SWITCH' || node.type === 'ELEC_SWITCH') {
       e.stopPropagation();
       onToggleSwitch?.(node.id);
+    } else if (node.type === 'ELEC_SPDT_SWITCH') {
+      e.stopPropagation();
+      const currentPos = node.state?.switchPosition || 'A';
+      onUpdateState?.(node.id, { switchPosition: currentPos === 'A' ? 'B' : 'A' });
+    } else if (node.type === 'ELEC_FUSE') {
+      e.stopPropagation();
+      onUpdateState?.(node.id, { isFuseBlown: !node.state?.isFuseBlown });
     }
   };
 
@@ -168,10 +177,15 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         touchAction: 'none',
         outline: isSelected
           ? isDark
-            ? '2px dashed #38bdf8'
-            : '2px dashed #0284c7'
+            ? '2px solid #38bdf8'
+            : '2px solid #0284c7'
           : 'none',
         outlineOffset: '4px',
+        boxShadow: isSelected
+          ? isDark
+            ? '0 2px 6px rgba(0, 0, 0, 0.35)'
+            : '0 2px 6px rgba(15, 23, 42, 0.12)'
+          : undefined,
         borderRadius: '6px',
         filter: isLit
           ? isDark
@@ -187,11 +201,14 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         }
       }}
       onContextMenu={(e) => {
-        // Desktop right-click opens inspector
         e.preventDefault();
         e.stopPropagation();
         onSelect(node.id, e);
-        onInspect?.(node.id);
+        if (onContextMenuNode) {
+          onContextMenuNode(node.id, e.clientX, e.clientY);
+        } else {
+          onInspect?.(node.id);
+        }
       }}
       onDoubleClick={(e) => {
         // Double-click opens inspector
@@ -220,7 +237,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           {isEditingVar ? (
-            <div className="flex items-center gap-1 bg-slate-900 px-2.5 py-0.5 rounded-full border border-sky-400 shadow-lg text-xs animate-in zoom-in-95 duration-100">
+            <div className="flex items-center gap-1 bg-slate-900 px-2.5 py-0.5 rounded-full border border-sky-400 shadow-sm text-xs animate-in zoom-in-95 duration-100">
               <input
                 ref={editInputRef}
                 type="text"
@@ -259,17 +276,17 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
               onClick={startEditing}
               onDoubleClick={startEditing}
             >
-              {/* Active signal indicator dot - only glows when signal is high/lit */}
+              {/* Active signal indicator dot */}
               <span
-                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                   varInfo.isHigh
-                    ? 'bg-sky-400 shadow-[0_0_4px_rgba(56,189,248,0.8)]'
+                    ? 'bg-sky-400'
                     : 'bg-slate-400/60'
                 }`}
               />
 
               {/* Variable Display Text */}
-              <span className="tracking-tight max-w-[140px] truncate">
+              <span className="tracking-tight max-w-35 truncate">
                 {varInfo.badgeText}
               </span>
 
@@ -327,3 +344,6 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     </div>
   );
 };
+
+export const NodeComponent = React.memo(NodeComponentBase);
+

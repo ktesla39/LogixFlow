@@ -45,6 +45,55 @@ export function getNodeDimensions(type: NodeType): { width: number; height: numb
       return { width: 96, height: 120 };
     case 'BUZZER':
       return { width: 78, height: 64 };
+    case 'FLOW_START':
+    case 'FLOW_END':
+      return { width: 140, height: 50 };
+    case 'FLOW_PROCESS':
+    case 'FLOW_INPUT':
+    case 'FLOW_OUTPUT':
+    case 'FLOW_SUBROUTINE':
+      return { width: 150, height: 60 };
+    case 'FLOW_DECISION':
+      return { width: 150, height: 80 };
+    case 'FLOW_CONNECTOR':
+      return { width: 50, height: 50 };
+    case 'SUBCIRCUIT':
+    case 'SUB_CIRCUIT':
+      return { width: 140, height: 96 };
+    case 'ELEC_RESISTOR':
+      return { width: 90, height: 48 };
+    case 'ELEC_CAPACITOR':
+    case 'ELEC_INDUCTOR':
+      return { width: 84, height: 50 };
+    case 'ELEC_DIODE':
+    case 'ELEC_ZENER':
+    case 'ELEC_LED':
+      return { width: 88, height: 54 };
+    case 'ELEC_BATTERY':
+      return { width: 80, height: 60 };
+    case 'ELEC_GROUND':
+      return { width: 60, height: 44 };
+    case 'ELEC_AC_SOURCE':
+      return { width: 76, height: 60 };
+    case 'ELEC_NPN':
+    case 'ELEC_PNP':
+      return { width: 92, height: 76 };
+    case 'ELEC_POTENTIOMETER':
+      return { width: 94, height: 68 };
+    case 'ELEC_SWITCH':
+      return { width: 84, height: 50 };
+    case 'ELEC_SPDT_SWITCH':
+      return { width: 88, height: 56 };
+    case 'ELEC_FUSE':
+      return { width: 84, height: 48 };
+    case 'ELEC_TRANSFORMER':
+      return { width: 94, height: 68 };
+    case 'ELEC_OPAMP':
+      return { width: 96, height: 72 };
+    case 'ELEC_VOLTMETER':
+    case 'ELEC_AMMETER':
+    case 'ELEC_OHMMETER':
+      return { width: 88, height: 64 };
     default:
       return { width: 100, height: 70 };
   }
@@ -725,6 +774,761 @@ export function createDefaultNode(
       });
       break;
     }
+
+    case 'FLOW_START': {
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'NEXT',
+        index: 0,
+        offsetX: 70,
+        offsetY: 50,
+        value: true,
+      });
+      break;
+    }
+
+    case 'FLOW_END': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 70,
+        offsetY: 0,
+        value: false,
+      });
+      break;
+    }
+
+    case 'FLOW_PROCESS': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 75,
+        offsetY: 0,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'NEXT',
+        index: 0,
+        offsetX: 75,
+        offsetY: 60,
+        value: true,
+      });
+      break;
+    }
+
+    case 'FLOW_DECISION': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 75,
+        offsetY: 4,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'YES',
+        index: 0,
+        offsetX: 146,
+        offsetY: 40,
+        value: true,
+      });
+      outputs.push({
+        id: `${nodeId}_out_1`,
+        nodeId,
+        type: 'output',
+        name: 'NO',
+        index: 1,
+        offsetX: 75,
+        offsetY: 76,
+        value: false,
+      });
+      break;
+    }
+
+    case 'FLOW_INPUT': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 75,
+        offsetY: 4,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'NEXT',
+        index: 0,
+        offsetX: 75,
+        offsetY: 56,
+        value: true,
+      });
+      break;
+    }
+
+    case 'FLOW_OUTPUT': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 75,
+        offsetY: 4,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'NEXT',
+        index: 0,
+        offsetX: 75,
+        offsetY: 56,
+        value: true,
+      });
+      break;
+    }
+
+    case 'FLOW_CONNECTOR': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN 1',
+        index: 0,
+        offsetX: 25,
+        offsetY: 4,
+        value: false,
+      });
+      inputs.push({
+        id: `${nodeId}_in_1`,
+        nodeId,
+        type: 'input',
+        name: 'IN 2',
+        index: 1,
+        offsetX: 4,
+        offsetY: 25,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'NEXT',
+        index: 0,
+        offsetX: 25,
+        offsetY: 46,
+        value: true,
+      });
+      break;
+    }
+
+    case 'FLOW_SUBROUTINE': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 75,
+        offsetY: 0,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'NEXT',
+        index: 0,
+        offsetX: 75,
+        offsetY: 60,
+        value: true,
+      });
+      break;
+    }
+
+    case 'SUBCIRCUIT':
+    case 'SUB_CIRCUIT': {
+      const inCount = stateOverride?.subcircuitInputMap?.length || (stateOverride?.subCircuitDef?.inputPins?.length) || 2;
+      const outCount = stateOverride?.subcircuitOutputMap?.length || (stateOverride?.subCircuitDef?.outputPins?.length) || 1;
+      for (let i = 0; i < inCount; i++) {
+        const pinName = stateOverride?.subCircuitDef?.inputPins?.[i]?.pinName || `IN${i + 1}`;
+        inputs.push({
+          id: `${nodeId}_in_${i}`,
+          nodeId,
+          type: 'input',
+          name: pinName,
+          index: i,
+          offsetX: 2,
+          offsetY: Math.round(20 + i * 22),
+          value: false,
+        });
+      }
+      for (let j = 0; j < outCount; j++) {
+        const pinName = stateOverride?.subCircuitDef?.outputPins?.[j]?.pinName || `OUT${j + 1}`;
+        outputs.push({
+          id: `${nodeId}_out_${j}`,
+          nodeId,
+          type: 'output',
+          name: pinName,
+          index: j,
+          offsetX: width - 2,
+          offsetY: Math.round(20 + j * 22),
+          value: false,
+        });
+      }
+      break;
+    }
+
+    case 'ELEC_RESISTOR': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'T1',
+        index: 0,
+        offsetX: 2,
+        offsetY: 24,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'T2',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 24,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_CAPACITOR': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: '+',
+        index: 0,
+        offsetX: 2,
+        offsetY: 25,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: '-',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 25,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_INDUCTOR': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'L1',
+        index: 0,
+        offsetX: 2,
+        offsetY: 25,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'L2',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 25,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_DIODE': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Anode (+)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 27,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Cathode (-)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 27,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_ZENER': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Anode (+)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 27,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Cathode (-)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 27,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_LED': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Anode (+)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 27,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Cathode (-)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 27,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_BATTERY': {
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'V+ (+9V)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 30,
+        value: true,
+      });
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'V- (0V)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 30,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_GROUND': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'GND (0V)',
+        index: 0,
+        offsetX: Math.round(width / 2),
+        offsetY: 2,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_AC_SOURCE': {
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'AC Out',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 30,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_NPN': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Base (B)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 38,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Collector (C)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 18,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_1`,
+        nodeId,
+        type: 'output',
+        name: 'Emitter (E)',
+        index: 1,
+        offsetX: width - 2,
+        offsetY: 58,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_PNP': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Base (B)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 38,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Emitter (E)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 18,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_1`,
+        nodeId,
+        type: 'output',
+        name: 'Collector (C)',
+        index: 1,
+        offsetX: width - 2,
+        offsetY: 58,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_POTENTIOMETER': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Terminal 1',
+        index: 0,
+        offsetX: 2,
+        offsetY: 18,
+        value: false,
+      });
+      inputs.push({
+        id: `${nodeId}_in_1`,
+        nodeId,
+        type: 'input',
+        name: 'Terminal 2',
+        index: 1,
+        offsetX: 2,
+        offsetY: 50,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Wiper (W)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 34,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_SWITCH': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'IN',
+        index: 0,
+        offsetX: 2,
+        offsetY: 25,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'OUT',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 25,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_VOLTMETER': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'V+ (Red)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 20,
+        value: false,
+      });
+      inputs.push({
+        id: `${nodeId}_in_1`,
+        nodeId,
+        type: 'input',
+        name: 'V- (Black)',
+        index: 1,
+        offsetX: 2,
+        offsetY: 44,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_AMMETER': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'A+ (In)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 32,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'A- (Out)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 32,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_OPAMP': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'V- (Inverting)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 22,
+        value: false,
+      });
+      inputs.push({
+        id: `${nodeId}_in_1`,
+        nodeId,
+        type: 'input',
+        name: 'V+ (Non-inv)',
+        index: 1,
+        offsetX: 2,
+        offsetY: 50,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Vout',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 36,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_TRANSFORMER': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Pri 1',
+        index: 0,
+        offsetX: 2,
+        offsetY: 18,
+        value: false,
+      });
+      inputs.push({
+        id: `${nodeId}_in_1`,
+        nodeId,
+        type: 'input',
+        name: 'Pri 2',
+        index: 1,
+        offsetX: 2,
+        offsetY: 50,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'Sec 1',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 18,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_1`,
+        nodeId,
+        type: 'output',
+        name: 'Sec 2',
+        index: 1,
+        offsetX: width - 2,
+        offsetY: 50,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_FUSE': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'F1',
+        index: 0,
+        offsetX: 2,
+        offsetY: 24,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'F2',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 24,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_SPDT_SWITCH': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'COM',
+        index: 0,
+        offsetX: 2,
+        offsetY: 28,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_0`,
+        nodeId,
+        type: 'output',
+        name: 'A (Top)',
+        index: 0,
+        offsetX: width - 2,
+        offsetY: 16,
+        value: false,
+      });
+      outputs.push({
+        id: `${nodeId}_out_1`,
+        nodeId,
+        type: 'output',
+        name: 'B (Bottom)',
+        index: 1,
+        offsetX: width - 2,
+        offsetY: 40,
+        value: false,
+      });
+      break;
+    }
+
+    case 'ELEC_OHMMETER': {
+      inputs.push({
+        id: `${nodeId}_in_0`,
+        nodeId,
+        type: 'input',
+        name: 'Lead 1 (Red)',
+        index: 0,
+        offsetX: 2,
+        offsetY: 20,
+        value: false,
+      });
+      inputs.push({
+        id: `${nodeId}_in_1`,
+        nodeId,
+        type: 'input',
+        name: 'Lead 2 (Black)',
+        index: 1,
+        offsetX: 2,
+        offsetY: 44,
+        value: false,
+      });
+      break;
+    }
   }
 
   const defaultLabel = customLabel || type;
@@ -740,9 +1544,29 @@ export function createDefaultNode(
     inputs,
     outputs,
     state: {
-      isOn: false,
-      frequencyHz: 1,
-      color: '#10b981',
+      isOn: type === 'ELEC_BATTERY' ? true : false,
+      frequencyHz: type === 'ELEC_AC_SOURCE' ? 60 : 1,
+      color: type === 'ELEC_LED' ? '#10b981' : '#10b981',
+      resistanceOhms: type === 'ELEC_RESISTOR' ? 1000 : type === 'ELEC_POTENTIOMETER' ? 10000 : undefined,
+      capacitanceFarads: type === 'ELEC_CAPACITOR' ? 0.00001 : undefined,
+      inductanceHenries: type === 'ELEC_INDUCTOR' ? 0.001 : undefined,
+      voltageVolts: type === 'ELEC_BATTERY' ? 9 : type === 'ELEC_GROUND' ? 0 : type === 'ELEC_AC_SOURCE' ? 5 : undefined,
+      forwardVoltageDrop: type === 'ELEC_DIODE' ? 0.7 : type === 'ELEC_ZENER' ? 0.7 : type === 'ELEC_LED' ? 2.0 : undefined,
+      zenerBreakdownVoltage: type === 'ELEC_ZENER' ? 5.1 : undefined,
+      isConducting: false,
+      potentiometerRatio: 0.5,
+      switchPosition: type === 'ELEC_SPDT_SWITCH' ? 'A' : undefined,
+      fuseCurrentRating: type === 'ELEC_FUSE' ? 0.5 : undefined,
+      isFuseBlown: false,
+      transformerRatio: type === 'ELEC_TRANSFORMER' ? 0.5 : undefined,
+      measuredValue:
+        type === 'ELEC_VOLTMETER'
+          ? '0.00 V'
+          : type === 'ELEC_AMMETER'
+          ? '0.0 mA'
+          : type === 'ELEC_OHMMETER'
+          ? '1.00 kΩ'
+          : undefined,
       variableName:
         stateOverride?.variableName ||
         (type === 'SWITCH' || type === 'BUTTON'
@@ -753,6 +1577,46 @@ export function createDefaultNode(
           ? 'VCC'
           : type === 'LOW_CONST'
           ? 'GND'
+          : type === 'ELEC_RESISTOR'
+          ? 'R'
+          : type === 'ELEC_CAPACITOR'
+          ? 'C'
+          : type === 'ELEC_INDUCTOR'
+          ? 'L'
+          : type === 'ELEC_DIODE'
+          ? 'D'
+          : type === 'ELEC_ZENER'
+          ? 'ZD'
+          : type === 'ELEC_LED'
+          ? 'LED'
+          : type === 'ELEC_BATTERY'
+          ? 'V1'
+          : type === 'ELEC_GROUND'
+          ? 'GND'
+          : type === 'ELEC_AC_SOURCE'
+          ? 'AC'
+          : type === 'ELEC_NPN'
+          ? 'Q1'
+          : type === 'ELEC_PNP'
+          ? 'Q2'
+          : type === 'ELEC_POTENTIOMETER'
+          ? 'POT'
+          : type === 'ELEC_SWITCH'
+          ? 'SW'
+          : type === 'ELEC_SPDT_SWITCH'
+          ? 'SW2'
+          : type === 'ELEC_FUSE'
+          ? 'F1'
+          : type === 'ELEC_TRANSFORMER'
+          ? 'T1'
+          : type === 'ELEC_OPAMP'
+          ? 'U1'
+          : type === 'ELEC_VOLTMETER'
+          ? 'VM'
+          : type === 'ELEC_AMMETER'
+          ? 'AM'
+          : type === 'ELEC_OHMMETER'
+          ? 'OM'
           : ['AND', 'OR', 'NOT', 'NAND', 'NOR', 'XOR', 'XNOR', 'BUFFER', 'TRI_STATE'].includes(type)
           ? 'Y'
           : ['D_FLIP_FLOP', 'JK_FLIP_FLOP', 'SR_FLIP_FLOP', 'T_FLIP_FLOP'].includes(type)
@@ -817,6 +1681,25 @@ export function evaluateCircuit(
     } else if (node.type === 'LOW_CONST') {
       if (node.outputs[0]) {
         node.outputs[0].value = false;
+      }
+    } else if (node.type === 'ELEC_BATTERY') {
+      if (node.outputs[0]) {
+        node.outputs[0].value = true;
+      }
+      if (node.inputs[0]) {
+        node.inputs[0].value = false;
+      }
+    } else if (node.type === 'ELEC_GROUND') {
+      if (node.inputs[0]) {
+        node.inputs[0].value = false;
+      }
+    } else if (node.type === 'ELEC_AC_SOURCE') {
+      const freq = node.state.frequencyHz || 60;
+      const periodMs = 1000 / freq;
+      const phase = (timeMs % periodMs) / periodMs;
+      const acVal = Math.sin(phase * 2 * Math.PI) > 0;
+      if (node.outputs[0]) {
+        node.outputs[0].value = acVal;
       }
     }
   });
@@ -1058,6 +1941,204 @@ export function evaluateCircuit(
             node.outputs[1].value = Boolean(node.state.qBar);
             hasChanged = true;
           }
+          return;
+        }
+
+        case 'SUBCIRCUIT':
+        case 'SUB_CIRCUIT': {
+          const subDef = node.state?.subCircuitDef;
+          const internalNodesSource = node.state?.subCircuitInternalNodes || node.state?.subcircuitNodes;
+          const internalWiresSource = node.state?.subCircuitInternalWires || node.state?.subcircuitWires || [];
+
+          if (internalNodesSource && internalNodesSource.length > 0) {
+            const internalNodes = internalNodesSource.map((n) => ({
+              ...n,
+              inputs: n.inputs.map((p) => ({ ...p })),
+              outputs: n.outputs.map((p) => ({ ...p })),
+              state: { ...n.state },
+            }));
+            const internalWires = internalWiresSource.map((w) => ({ ...w }));
+
+            if (subDef && subDef.inputPins) {
+              subDef.inputPins.forEach((inDef, idx) => {
+                const extVal = Boolean(node.inputs[idx]?.value);
+                const targetIntNodeId = `${node.id}_int_${inDef.internalNodeId}`;
+                const tgt = internalNodes.find((n) => n.id === targetIntNodeId || n.id === inDef.internalNodeId);
+                if (tgt) {
+                  if (tgt.type === 'SWITCH' || tgt.type === 'BUTTON') {
+                    tgt.state.isOn = extVal;
+                    if (tgt.outputs[0]) tgt.outputs[0].value = extVal;
+                  } else {
+                    const inPin = tgt.inputs.find((p) => p.id === `${node.id}_int_${inDef.internalPinId}` || p.id === inDef.internalPinId);
+                    if (inPin) inPin.value = extVal;
+                  }
+                }
+              });
+            } else if (node.state.subcircuitInputMap) {
+              for (const mapping of node.state.subcircuitInputMap) {
+                const extPin = node.inputs.find((p) => p.id === mapping.pinId);
+                if (!extPin) continue;
+                const tgt = internalNodes.find((n) => n.id === mapping.internalNodeId);
+                if (!tgt) continue;
+                if (tgt.type === 'SWITCH' || tgt.type === 'BUTTON') {
+                  tgt.state.isOn = extPin.value;
+                  if (tgt.outputs[0]) tgt.outputs[0].value = extPin.value;
+                } else {
+                  const inP = tgt.inputs.find((p) => p.id === mapping.internalPinId);
+                  if (inP) inP.value = extPin.value;
+                }
+              }
+            }
+
+            const subResult = evaluateCircuit(internalNodes, internalWires, timeMs);
+
+            if (subDef && subDef.outputPins) {
+              subDef.outputPins.forEach((outDef, idx) => {
+                const targetIntNodeId = `${node.id}_int_${outDef.internalNodeId}`;
+                const src = subResult.nodes.find((n) => n.id === targetIntNodeId || n.id === outDef.internalNodeId);
+                if (src) {
+                  const outPin = src.outputs.find((p) => p.id === `${node.id}_int_${outDef.internalPinId}` || p.id === outDef.internalPinId);
+                  const val = outPin ? outPin.value : false;
+                  if (node.outputs[idx] && node.outputs[idx].value !== val) {
+                    node.outputs[idx].value = val;
+                    hasChanged = true;
+                  }
+                }
+              });
+            } else if (node.state.subcircuitOutputMap) {
+              for (const mapping of node.state.subcircuitOutputMap) {
+                const extPin = node.outputs.find((p) => p.id === mapping.pinId);
+                if (!extPin) continue;
+                const src = subResult.nodes.find((n) => n.id === mapping.internalNodeId);
+                if (!src) continue;
+                const outP = src.outputs.find((p) => p.id === mapping.internalPinId);
+                const val = outP ? outP.value : false;
+                if (extPin.value !== val) {
+                  extPin.value = val;
+                  hasChanged = true;
+                }
+              }
+            }
+          }
+          return;
+        }
+
+        case 'ELEC_RESISTOR':
+        case 'ELEC_CAPACITOR':
+        case 'ELEC_INDUCTOR':
+          outVal = Boolean(inVals[0]);
+          break;
+
+        case 'ELEC_DIODE':
+        case 'ELEC_ZENER': {
+          const conducting = Boolean(inVals[0]);
+          node.state.isConducting = conducting;
+          outVal = conducting;
+          break;
+        }
+
+        case 'ELEC_LED': {
+          const conducting = Boolean(inVals[0]);
+          node.state.isConducting = conducting;
+          node.state.isOn = conducting;
+          outVal = conducting;
+          break;
+        }
+
+        case 'ELEC_SWITCH': {
+          outVal = node.state.isOn ? Boolean(inVals[0]) : false;
+          break;
+        }
+
+        case 'ELEC_SPDT_SWITCH': {
+          const comVal = Boolean(inVals[0]);
+          const pos = node.state.switchPosition || 'A';
+          const outA = pos === 'A' ? comVal : false;
+          const outB = pos === 'B' ? comVal : false;
+          if (node.outputs[0] && node.outputs[0].value !== outA) {
+            node.outputs[0].value = outA;
+            hasChanged = true;
+          }
+          if (node.outputs[1] && node.outputs[1].value !== outB) {
+            node.outputs[1].value = outB;
+            hasChanged = true;
+          }
+          return;
+        }
+
+        case 'ELEC_FUSE': {
+          const inVal = Boolean(inVals[0]);
+          outVal = node.state.isFuseBlown ? false : inVal;
+          break;
+        }
+
+        case 'ELEC_OPAMP': {
+          // inVals[0] = V- (Inverting), inVals[1] = V+ (Non-inverting)
+          const vInv = Boolean(inVals[0]);
+          const vNonInv = Boolean(inVals[1]);
+          // Comparator behavior: V+ > V- => HIGH (Saturation)
+          outVal = vNonInv && !vInv;
+          break;
+        }
+
+        case 'ELEC_TRANSFORMER': {
+          // Coupled transfer from Pri 1 to Sec 1
+          outVal = Boolean(inVals[0]);
+          if (node.outputs[1]) {
+            node.outputs[1].value = false;
+          }
+          break;
+        }
+
+        case 'ELEC_POTENTIOMETER': {
+          outVal = Boolean(inVals[0]);
+          break;
+        }
+
+        case 'ELEC_NPN': {
+          const isBaseHigh = Boolean(inVals[0]);
+          node.state.isConducting = isBaseHigh;
+          if (node.outputs[1] && node.outputs[1].value !== isBaseHigh) {
+            node.outputs[1].value = isBaseHigh;
+            hasChanged = true;
+          }
+          return;
+        }
+
+        case 'ELEC_PNP': {
+          const isBaseLow = !Boolean(inVals[0]);
+          node.state.isConducting = isBaseLow;
+          if (node.outputs[1] && node.outputs[1].value !== isBaseLow) {
+            node.outputs[1].value = isBaseLow;
+            hasChanged = true;
+          }
+          return;
+        }
+
+        case 'ELEC_VOLTMETER': {
+          const pos = Boolean(inVals[0]);
+          const neg = Boolean(inVals[1]);
+          if (pos && !neg) {
+            node.state.measuredValue = '+5.00 V';
+          } else if (!pos && neg) {
+            node.state.measuredValue = '-5.00 V';
+          } else {
+            node.state.measuredValue = '0.00 V';
+          }
+          return;
+        }
+
+        case 'ELEC_AMMETER': {
+          const inVal = Boolean(inVals[0]);
+          node.state.measuredValue = inVal ? '25.0 mA' : '0.0 mA';
+          outVal = inVal;
+          break;
+        }
+
+        case 'ELEC_OHMMETER': {
+          const in1 = Boolean(inVals[0]);
+          const in2 = Boolean(inVals[1]);
+          node.state.measuredValue = in1 || in2 ? '1.00 kΩ' : 'O.L. (Open)';
           return;
         }
 

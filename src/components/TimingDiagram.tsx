@@ -13,6 +13,7 @@ interface TimingDiagramProps {
   isOpen: boolean;
   onToggle: () => void;
   onClear: () => void;
+  theme?: 'dark' | 'light';
 }
 
 export const TimingDiagram: React.FC<TimingDiagramProps> = ({
@@ -20,18 +21,32 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
   isOpen,
   onToggle,
   onClear,
+  theme = 'dark',
 }) => {
+  const isDark = theme === 'dark';
   const SAMPLES_COUNT = 32;
 
   return (
-    <div className="border-t border-slate-800 bg-slate-950/95 backdrop-blur-md transition-all select-none z-20">
+    <div
+      className={`border-t backdrop-blur-md transition-all select-none z-20 ${
+        isDark
+          ? 'border-slate-800 bg-slate-950/95 text-slate-100'
+          : 'border-slate-300 bg-white/95 text-slate-800 shadow-lg'
+      }`}
+    >
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-800/80">
+      <div
+        className={`flex items-center justify-between px-3 py-1.5 border-b ${
+          isDark ? 'border-slate-800/80 bg-slate-950/50' : 'border-slate-200 bg-slate-50'
+        }`}
+      >
         <div
-          className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white"
+          className={`flex items-center gap-2 cursor-pointer transition-colors ${
+            isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-900'
+          }`}
           onClick={onToggle}
         >
-          <Activity size={15} className="text-emerald-400" />
+          <Activity size={15} className={isDark ? 'text-emerald-400' : 'text-emerald-600'} />
           <span className="text-xs font-semibold">Signal Waveforms</span>
           <span className="text-[10px] font-mono text-slate-500">
             ({signals.length} monitored signals)
@@ -43,7 +58,7 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
             <button
               type="button"
               onClick={onClear}
-              className="text-[10px] text-slate-400 hover:text-rose-300 px-2 py-0.5 rounded bg-slate-900 border border-slate-800"
+              className="btn btn-outline-danger btn-sm py-0.5 px-2 text-[10px]"
             >
               Clear Buffer
             </button>
@@ -51,9 +66,10 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
           <button
             type="button"
             onClick={onToggle}
-            className="p-1 text-slate-400 hover:text-slate-200 rounded"
+            className="btn btn-sm btn-icon btn-outline-secondary"
+            title={isOpen ? "Collapse Waveforms" : "Expand Waveforms"}
           >
-            {isOpen ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+            {isOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
           </button>
         </div>
       </div>
@@ -102,12 +118,23 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
               return (
                 <div key={sig.id || `sig_${sig.name}_${idx}`} className="flex items-center gap-3">
                   <div className="w-28 truncate shrink-0 flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-300 truncate" title={sig.name}>
+                    <span
+                      className={`text-[11px] font-semibold truncate ${
+                        isDark ? 'text-slate-300' : 'text-slate-700'
+                      }`}
+                      title={sig.name}
+                    >
                       {sig.name}
                     </span>
                     <span
                       className={`text-[10px] font-bold px-1 rounded ${
-                        currentVal ? 'bg-emerald-950 text-emerald-300' : 'bg-slate-900 text-slate-500'
+                        currentVal
+                          ? isDark
+                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/60'
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : isDark
+                          ? 'bg-slate-900 text-slate-500 border border-slate-800'
+                          : 'bg-slate-100 text-slate-600 border border-slate-300'
                       }`}
                     >
                       {currentVal ? '1' : '0'}
@@ -115,7 +142,13 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
                   </div>
 
                   {/* SVG Waveform track */}
-                  <div className="flex-1 overflow-x-hidden bg-slate-900/60 rounded border border-slate-800 p-1">
+                  <div
+                    className={`flex-1 overflow-x-hidden rounded border p-1 ${
+                      isDark
+                        ? 'bg-slate-900/60 border-slate-800'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
                     <svg
                       width={SAMPLES_COUNT * stepWidth}
                       height="26"
@@ -127,7 +160,7 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
                         y1={lowY}
                         x2={SAMPLES_COUNT * stepWidth}
                         y2={lowY}
-                        stroke="#334155"
+                        stroke={isDark ? '#334155' : '#cbd5e1'}
                         strokeDasharray="2 2"
                         strokeWidth="1"
                       />
@@ -135,7 +168,7 @@ export const TimingDiagram: React.FC<TimingDiagramProps> = ({
                       <path
                         d={pathD}
                         fill="none"
-                        stroke={sig.color || (currentVal ? '#10b981' : '#38bdf8')}
+                        stroke={sig.color || (currentVal ? '#10b981' : isDark ? '#38bdf8' : '#0284c7')}
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"

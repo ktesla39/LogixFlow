@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Sheet } from '../types';
-import { Plus, Copy, Trash2, Edit2, Layers, Check, X, Search, PanelTop } from 'lucide-react';
+import { Plus, Copy, Trash2, Edit2, Layers, Check, X, Search, PanelTop, GitFork, Zap } from 'lucide-react';
+import { ContextMenu, ContextMenuItem } from './ContextMenu';
 
 interface SheetTabsProps {
   sheets: Sheet[];
   activeSheetId: string;
   onSelectSheet: (id: string) => void;
-  onCreateSheet: () => void;
+  onCreateSheet: (type?: 'logic' | 'flowchart' | 'electric') => void;
   onRenameSheet: (id: string, newName: string) => void;
   onDuplicateSheet: (id: string) => void;
   onDeleteSheet: (id: string) => void;
@@ -28,6 +29,11 @@ export const SheetTabs: React.FC<SheetTabsProps> = ({
   const [editName, setEditName] = useState('');
   const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    sheet: Sheet;
+  } | null>(null);
 
   const startRename = (sheet: Sheet) => {
     setEditingId(sheet.id);
@@ -158,7 +164,7 @@ export const SheetTabs: React.FC<SheetTabsProps> = ({
                 onCreateSheet();
                 setIsManagerOpen(false);
               }}
-              className="flex items-center gap-1.5 rounded-md bg-sky-600 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-sky-500"
+              className="btn btn-primary btn-sm font-semibold"
             >
               <Plus size={12} />
               New sheet
@@ -171,19 +177,13 @@ export const SheetTabs: React.FC<SheetTabsProps> = ({
       <button
         type="button"
         onClick={() => setIsManagerOpen((open) => !open)}
-        className={`flex items-center gap-1.5 mr-2 font-medium shrink-0 rounded-md px-1.5 py-1 transition-colors ${
-          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-300/70'
-        }`}
+        className="btn btn-outline-secondary btn-sm mr-2 font-semibold shrink-0"
         title="Open sheet manager"
         aria-label="Open sheet manager"
         aria-expanded={isManagerOpen}
       >
         <Layers size={14} className={isDark ? 'text-sky-400' : 'text-sky-600'} />
-        <span
-          className={`hidden sm:inline text-[11px] font-semibold uppercase tracking-wider ${
-            isDark ? 'text-slate-400' : 'text-slate-600'
-          }`}
-        >
+        <span className="hidden sm:inline text-[11px] uppercase tracking-wider">
           Sheets
         </span>
       </button>
@@ -240,6 +240,16 @@ export const SheetTabs: React.FC<SheetTabsProps> = ({
               key={sheet.id}
               onClick={() => onSelectSheet(sheet.id)}
               onDoubleClick={() => startRename(sheet)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelectSheet(sheet.id);
+                setContextMenu({
+                  x: e.clientX,
+                  y: e.clientY,
+                  sheet,
+                });
+              }}
               className={`group flex items-center gap-2 px-3 py-1.5 rounded-t-lg border-t border-x cursor-pointer transition-all shrink-0 ${
                 isActive
                   ? isDark
@@ -250,6 +260,13 @@ export const SheetTabs: React.FC<SheetTabsProps> = ({
                   : 'bg-slate-200/50 border-transparent hover:bg-slate-300/80 text-slate-600 hover:text-slate-900'
               }`}
             >
+              {sheet.circuitType === 'flowchart' ? (
+                <GitFork size={12} className={isActive ? 'text-amber-400' : 'text-slate-500'} />
+              ) : sheet.circuitType === 'electric' ? (
+                <Zap size={12} className={isActive ? 'text-emerald-400' : 'text-slate-500'} />
+              ) : (
+                <img src="/logo.png" alt="" className={`w-3.5 h-3.5 object-contain ${isActive ? 'opacity-100' : 'opacity-60'}`} />
+              )}
               <span className="truncate max-w-32.5">{sheet.name}</span>
 
               {/* Node count pill */}
@@ -326,21 +343,102 @@ export const SheetTabs: React.FC<SheetTabsProps> = ({
         })}
       </div>
 
-      {/* New Sheet Button */}
-      <button
-        type="button"
-        id="btn-create-sheet"
-        onClick={onCreateSheet}
-        className={`flex items-center gap-1 px-2 py-1 rounded-md border transition-colors shrink-0 ${
-          isDark
-            ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700/80'
-            : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-300 shadow-2xs'
-        }`}
-        title="Add new circuit sheet"
-      >
-        <Plus size={13} />
-        <span className="hidden sm:inline text-xs font-medium">New Sheet</span>
-      </button>
+      {/* New Sheet Buttons */}
+      <div className="flex items-center gap-1 shrink-0">
+        <button
+          type="button"
+          id="btn-create-sheet"
+          onClick={() => onCreateSheet('logic')}
+          className="btn btn-outline-primary btn-sm font-medium"
+          title="Add new digital logic circuit sheet"
+        >
+          <img src="/logo.png" alt="" className="w-3.5 h-3.5 object-contain" />
+          <span className="hidden sm:inline text-[11px]">+ Circuit</span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-create-electric-sheet"
+          onClick={() => onCreateSheet('electric')}
+          className="btn btn-outline-success btn-sm font-medium"
+          title="Add new electric / analog circuit sheet"
+        >
+          <Zap size={12} className="text-emerald-500" />
+          <span className="hidden sm:inline text-[11px]">+ Electric</span>
+        </button>
+
+        <button
+          type="button"
+          id="btn-create-flowchart-sheet"
+          onClick={() => onCreateSheet('flowchart')}
+          className="btn btn-outline-warning btn-sm font-medium"
+          title="Add new algorithm flowchart sheet"
+        >
+          <GitFork size={12} />
+          <span className="hidden sm:inline text-[11px]">+ Flowchart</span>
+        </button>
+      </div>
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          theme={theme}
+          title={`Sheet: ${contextMenu.sheet.name}`}
+          onClose={() => setContextMenu(null)}
+          items={[
+            {
+              id: 'rename',
+              label: 'Rename Sheet',
+              icon: Edit2,
+              shortcut: 'Double-click',
+              onClick: () => startRename(contextMenu.sheet),
+            },
+            {
+              id: 'duplicate',
+              label: 'Duplicate Sheet',
+              icon: Copy,
+              onClick: () => onDuplicateSheet(contextMenu.sheet.id),
+            },
+            {
+              id: 'div-add',
+              label: '',
+              divider: true,
+            },
+            {
+              id: 'new-logic',
+              label: 'New Logic Sheet',
+              icon: Layers,
+              onClick: () => onCreateSheet('logic'),
+            },
+            {
+              id: 'new-electric',
+              label: 'New Electric Sheet',
+              icon: Zap,
+              onClick: () => onCreateSheet('electric'),
+            },
+            {
+              id: 'new-flowchart',
+              label: 'New Flowchart Sheet',
+              icon: GitFork,
+              onClick: () => onCreateSheet('flowchart'),
+            },
+            {
+              id: 'div-del',
+              label: '',
+              divider: true,
+            },
+            {
+              id: 'delete',
+              label: 'Delete Sheet',
+              icon: Trash2,
+              danger: true,
+              disabled: sheets.length <= 1,
+              onClick: () => onDeleteSheet(contextMenu.sheet.id),
+            },
+          ]}
+        />
+      )}
     </div>
   );
 };

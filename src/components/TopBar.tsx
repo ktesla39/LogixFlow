@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SimulationSettings } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ShieldCheck, PanelLeft } from 'lucide-react';
 import {
   faPlay,
   faPause,
@@ -53,6 +54,9 @@ interface TopBarProps {
   onOpenHelpModal: () => void;
   onLoadPreset: (presetIndex: number) => void;
   onToggleMobileDrawer: () => void;
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+  onOpenEdaTools?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -76,6 +80,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   onOpenHelpModal,
   onLoadPreset,
   onToggleMobileDrawer,
+  isSidebarOpen = true,
+  onToggleSidebar,
+  onOpenEdaTools,
 }) => {
   const [showPresetsMenu, setShowPresetsMenu] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -106,22 +113,53 @@ export const TopBar: React.FC<TopBarProps> = ({
     >
       {/* Brand, Home Navigation & Project Title */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* App Logo */}
+        <div
+          onClick={onNavigateHome}
+          className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-opacity"
+          title="LogixFlow EDA Studio - Home"
+        >
+          <img
+            src="/logo.png"
+            alt="LogixFlow Logo"
+            className="w-7 h-7 object-contain rounded-md shadow-xs ring-1 ring-slate-700/50"
+          />
+          <span className="hidden xl:inline font-mono font-bold text-xs tracking-tight text-sky-400">
+            LOGIXFLOW
+          </span>
+        </div>
+
         {/* Mobile Add Component Button */}
         <button
           type="button"
           onClick={onToggleMobileDrawer}
-          className="lf-control lf-icon-control md:hidden p-1.5 rounded-lg bg-sky-600 text-white shadow hover:bg-sky-500 transition-colors"
+          className="btn btn-primary btn-sm btn-icon md:hidden shadow-sm"
           title="Add Component"
         >
           <FontAwesomeIcon icon={faSquarePlus} className="w-3.5 h-3.5" />
         </button>
+
+        {/* Desktop Sidebar Toggle Button */}
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className={`btn btn-sm ${
+              isSidebarOpen ? 'btn-primary' : 'btn-outline-secondary'
+            } hidden md:inline-flex items-center gap-1.5`}
+            title={isSidebarOpen ? 'Collapse Components Sidebar (Ctrl+B)' : 'Expand Components Sidebar (Ctrl+B)'}
+          >
+            <PanelLeft size={13} />
+            <span className="text-xs">Palette</span>
+          </button>
+        )}
 
         {/* Home / Projects Dashboard Button */}
         {onNavigateHome && (
           <button
             type="button"
             onClick={onNavigateHome}
-            className="lf-control flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700/80 transition-colors shadow-sm"
+            className="btn btn-outline-secondary btn-sm font-semibold"
             title="Return to Main Menu / Projects"
           >
             <FontAwesomeIcon icon={faHouse} className="w-3 h-3 text-sky-400" />
@@ -130,7 +168,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
 
         {/* Project Title (Inline Editable) */}
-        <div className="flex items-center gap-1.5 border-l border-slate-800 pl-2 sm:pl-3">
+        <div className="flex items-center gap-1.5 border-l border-slate-700/80 pl-2 sm:pl-3">
           {isEditingTitle ? (
             <form onSubmit={handleSaveTitle} className="flex items-center gap-1">
               <input
@@ -138,9 +176,13 @@ export const TopBar: React.FC<TopBarProps> = ({
                 value={titleInput}
                 onChange={(e) => setTitleInput(e.target.value)}
                 autoFocus
-                className="bg-slate-950 border border-sky-400 rounded px-2 py-0.5 text-xs text-white font-mono focus:outline-none w-36"
+                className={`form-control form-control-sm border rounded px-2 py-0.5 text-xs font-mono focus:outline-none w-36 ${
+                  isDark
+                    ? 'bg-slate-950 border-sky-400 text-white'
+                    : 'bg-white border-sky-500 text-slate-900 shadow-xs'
+                }`}
               />
-              <button type="submit" className="p-1 text-sky-400 hover:text-white" title="Save title">
+              <button type="submit" className="btn btn-sm btn-outline-success btn-icon p-1" title="Save title">
                 <FontAwesomeIcon icon={faCheck} className="w-3 h-3" />
               </button>
             </form>
@@ -150,10 +192,12 @@ export const TopBar: React.FC<TopBarProps> = ({
                 setTitleInput(projectName);
                 setIsEditingTitle(true);
               }}
-              className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-800/70 cursor-pointer group/title"
+              className={`flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer group/title transition-colors ${
+                isDark ? 'hover:bg-slate-800/70' : 'hover:bg-slate-200/60'
+              }`}
               title="Click to rename project"
             >
-              <span className="text-xs sm:text-sm font-bold text-white font-mono max-w-32.5 sm:max-w-50 truncate">
+              <span className={`text-xs sm:text-sm font-bold font-mono max-w-32.5 sm:max-w-50 truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {projectName}
               </span>
               <FontAwesomeIcon
@@ -169,10 +213,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={onNewCircuit}
-            className="lf-control hidden lg:flex items-center gap-1 px-2 py-1 rounded bg-slate-800/60 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs border border-slate-700/60 transition-colors"
+            className="btn btn-outline-success btn-sm hidden lg:inline-flex"
             title="Create a new blank circuit"
           >
-            <FontAwesomeIcon icon={faPlus} className="w-2.5 h-2.5 text-emerald-400" />
+            <FontAwesomeIcon icon={faPlus} className="w-2.5 h-2.5" />
             <span>New</span>
           </button>
         )}
@@ -185,14 +229,15 @@ export const TopBar: React.FC<TopBarProps> = ({
           type="button"
           id="btn-toggle-run"
           onClick={() => onUpdateSettings({ running: !settings.running })}
-          className={`lf-control flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs shadow-md transition-all ${
+          className={`btn btn-sm font-bold shadow-sm ${
             settings.running
-              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/40'
-              : 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-950/40'
+              ? 'btn-warning'
+              : 'btn-success'
           }`}
           title={settings.running ? 'Pause simulation' : 'Run simulation'}
         >
           <FontAwesomeIcon icon={settings.running ? faPause : faPlay} className="w-3 h-3" />
+          <span className="hidden sm:inline">{settings.running ? 'Running' : 'Run'}</span>
         </button>
 
         {/* Step Button */}
@@ -200,7 +245,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           type="button"
           id="btn-step"
           onClick={onStepSimulation}
-          className="lf-control flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 text-xs font-medium transition-colors"
+          className="btn btn-outline-secondary btn-sm"
           title="Step one clock pulse forward"
         >
           <FontAwesomeIcon icon={faForwardStep} className="w-3 h-3" />
@@ -212,10 +257,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           type="button"
           id="btn-truth-table"
           onClick={onOpenTruthTable}
-          className="lf-control flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700/80 text-xs font-medium transition-colors"
+          className="btn btn-outline-info btn-sm"
           title="Generate Truth Table"
         >
           <FontAwesomeIcon icon={faTable} className="w-3 h-3" />
+          <span className="hidden lg:inline">Table</span>
         </button>
 
         {/* Oscilloscope / Waveforms Button */}
@@ -225,39 +271,43 @@ export const TopBar: React.FC<TopBarProps> = ({
           onClick={() =>
             onUpdateSettings({ showTimingDiagram: !settings.showTimingDiagram })
           }
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+          className={`btn btn-sm hidden sm:inline-flex ${
             settings.showTimingDiagram
-              ? 'bg-emerald-950/80 border-emerald-600 text-emerald-300'
-              : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+              ? 'btn-success'
+              : 'btn-outline-secondary'
           }`}
           title="Toggle Waveform Scope"
         >
           <FontAwesomeIcon icon={faWaveSquare} className="w-3 h-3" />
+          <span className="hidden xl:inline">Scope</span>
         </button>
       </div>
 
       {/* Secondary Controls & View Tools */}
       <div className="flex items-center gap-1 sm:gap-1.5">
-        <button
-          type="button"
-          onClick={onUndo}
-          disabled={!canUndo}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-35 disabled:hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition-colors"
-          title="Undo last circuit edit"
-          aria-label="Undo last circuit edit"
-        >
-          <FontAwesomeIcon icon={faRotateLeft} className="w-3.5 h-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={onRedo}
-          disabled={!canRedo}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-35 disabled:hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition-colors"
-          title="Redo last circuit edit"
-          aria-label="Redo last circuit edit"
-        >
-          <FontAwesomeIcon icon={faRotateRight} className="w-3.5 h-3.5" />
-        </button>
+        {/* Undo / Redo Group */}
+        <div className="btn-group btn-group-sm" role="group" aria-label="Undo and Redo">
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="btn btn-outline-secondary btn-sm btn-icon"
+            title="Undo last circuit edit (Ctrl+Z)"
+            aria-label="Undo last circuit edit"
+          >
+            <FontAwesomeIcon icon={faRotateLeft} className="w-3 h-3" />
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="btn btn-outline-secondary btn-sm btn-icon"
+            title="Redo last circuit edit (Ctrl+Y)"
+            aria-label="Redo last circuit edit"
+          >
+            <FontAwesomeIcon icon={faRotateRight} className="w-3 h-3" />
+          </button>
+        </div>
 
         {/* Wire Style: Curved vs Orthogonal */}
         <button
@@ -267,29 +317,27 @@ export const TopBar: React.FC<TopBarProps> = ({
               wireStyle: settings.wireStyle === 'curved' ? 'orthogonal' : 'curved',
             })
           }
-          className="hidden sm:flex p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-colors"
+          className="btn btn-outline-secondary btn-sm btn-icon hidden sm:inline-flex"
           title={`Wire Style: ${settings.wireStyle === 'curved' ? 'Curved Bezier' : 'Orthogonal Manhattan'}`}
         >
           <FontAwesomeIcon icon={faCodeBranch} className="w-3.5 h-3.5" />
         </button>
 
-        
-
         {/* Canvas Grid Lines Toggle */}
         <button
           type="button"
           onClick={() => onUpdateSettings({ showGrid: !settings.showGrid })}
-          className={`hidden sm:flex p-1.5 rounded-lg border transition-colors ${
+          className={`btn btn-sm btn-icon hidden sm:inline-flex ${
             settings.showGrid
-              ? 'bg-sky-950 border-sky-600 text-sky-400'
-              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+              ? 'btn-info'
+              : 'btn-outline-secondary'
           }`}
           title={settings.showGrid ? 'Grid: Visible' : 'Grid: Hidden'}
         >
           <FontAwesomeIcon icon={faBorderAll} className="w-3.5 h-3.5" />
         </button>
 
-        {/* Circuit Flow Notation (0/1 & Boolean Expressions) Toggle */}
+        {/* Circuit Flow Notation Toggle */}
         <button
           type="button"
           id="btn-toggle-notation"
@@ -298,10 +346,10 @@ export const TopBar: React.FC<TopBarProps> = ({
               showWireExpressions: !settings.showWireExpressions,
             })
           }
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+          className={`btn btn-sm hidden sm:inline-flex ${
             settings.showWireExpressions
-              ? 'bg-sky-950/80 border-sky-500 text-sky-300'
-              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+              ? 'btn-warning'
+              : 'btn-outline-secondary'
           }`}
           title={
             settings.showWireExpressions
@@ -309,7 +357,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               : 'Circuit Flow Notation: OFF (Click to display flow state & Boolean expressions)'
           }
         >
-          <FontAwesomeIcon icon={faBolt} className="w-3 h-3 text-amber-400" />
+          <FontAwesomeIcon icon={faBolt} className="w-3 h-3" />
           <span className="hidden xl:inline">Notation</span>
         </button>
 
@@ -322,10 +370,10 @@ export const TopBar: React.FC<TopBarProps> = ({
               showComponentVariables: !settings.showComponentVariables,
             })
           }
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+          className={`btn btn-sm hidden sm:inline-flex ${
             settings.showComponentVariables !== false
-              ? 'bg-sky-950/80 border-sky-500 text-sky-300'
-              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+              ? 'btn-primary'
+              : 'btn-outline-secondary'
           }`}
           title={
             settings.showComponentVariables !== false
@@ -333,41 +381,51 @@ export const TopBar: React.FC<TopBarProps> = ({
               : 'Component Variables: Hidden (Click to show variables above all components)'
           }
         >
-          <FontAwesomeIcon icon={faTag} className="w-3 h-3 text-sky-400" />
+          <FontAwesomeIcon icon={faTag} className="w-3 h-3" />
           <span className="hidden xl:inline">Variables</span>
         </button>
+
+        {/* Altium-inspired EDA Tools Workstation (DRC, BOM, Netlist) */}
+        {onOpenEdaTools && (
+          <button
+            type="button"
+            id="btn-eda-tools"
+            onClick={onOpenEdaTools}
+            className="btn btn-outline-secondary btn-sm flex items-center gap-1.5 border-sky-500/50 text-sky-400 hover:bg-sky-500/15"
+            title="Altium EDA Workstation: Electrical Rules Check (DRC/ERC), Bill of Materials (BOM), Netlist Inspector"
+          >
+            <ShieldCheck size={14} className="text-sky-400" />
+            <span className="hidden sm:inline font-mono font-bold text-xs">EDA Tools</span>
+          </button>
+        )}
 
         {/* Dark / Light Theme Toggle */}
         <button
           type="button"
           id="btn-toggle-theme"
           onClick={toggleTheme}
-          className={`p-1.5 rounded-lg border transition-colors ${
-            isDark
-              ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-300'
-              : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-sky-300'
-          }`}
+          className="btn btn-outline-secondary btn-sm btn-icon"
           title={isDark ? 'Switch to Light Blueprint Theme' : 'Switch to Dark Mode Theme'}
         >
-          <FontAwesomeIcon icon={isDark ? faSun : faMoon} className="w-3.5 h-3.5" />
+          <FontAwesomeIcon icon={isDark ? faSun : faMoon} className="w-3.5 h-3.5 text-amber-400" />
         </button>
 
         {/* Sound Toggle */}
         <button
           type="button"
           onClick={() => onUpdateSettings({ soundEnabled: !settings.soundEnabled })}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-colors"
+          className="btn btn-outline-secondary btn-sm btn-icon"
           title={settings.soundEnabled ? 'Audio: Enabled' : 'Audio: Muted'}
         >
           <FontAwesomeIcon icon={settings.soundEnabled ? faVolumeHigh : faVolumeXmark} className="w-3.5 h-3.5" />
         </button>
 
-        {/* Zoom Controls */}
-        <div className="hidden lg:flex items-center bg-slate-800 rounded-lg border border-slate-700/80 overflow-hidden">
+        {/* Zoom Controls Button Group */}
+        <div className="btn-group btn-group-sm hidden lg:inline-flex" role="group" aria-label="Zoom controls">
           <button
             type="button"
             onClick={onZoomOut}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+            className="btn btn-outline-secondary btn-sm btn-icon"
             title="Zoom out (-)"
           >
             <FontAwesomeIcon icon={faMagnifyingGlassMinus} className="w-3 h-3" />
@@ -375,7 +433,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={onResetView}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+            className="btn btn-outline-secondary btn-sm btn-icon"
             title="Reset zoom & pan"
           >
             <FontAwesomeIcon icon={faExpand} className="w-3 h-3" />
@@ -383,45 +441,44 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={onZoomIn}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+            className="btn btn-outline-secondary btn-sm btn-icon"
             title="Zoom in (+)"
           >
             <FontAwesomeIcon icon={faMagnifyingGlassPlus} className="w-3 h-3" />
           </button>
         </div>
 
-        {/* Export / Import Button */}
+        {/* Export / Download Button */}
         <button
           type="button"
           id="btn-export-import"
           onClick={onOpenExportModal}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-colors"
-          title="Export / Import Circuit JSON"
+          className="btn btn-primary btn-sm shadow-sm"
+          title="Download as PNG (High-Res) / Export JSON Project"
         >
           <FontAwesomeIcon icon={faDownload} className="w-3.5 h-3.5" />
+          <span className="hidden xl:inline">Export</span>
         </button>
 
         <button
           type="button"
           onClick={onExportSvg}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-colors"
+          className="btn btn-outline-secondary btn-sm btn-icon"
           title="Export circuit as SVG"
         >
           <FontAwesomeIcon icon={faFileCode} className="w-3.5 h-3.5" />
         </button>
 
-        {/* Help Button */}
+        {/* Help / Guide Button */}
         <button
           type="button"
+          id="btn-guide-shortcuts"
           onClick={onOpenHelpModal}
-          className={`p-1.5 rounded-lg border transition-colors ${
-            isDark
-              ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700/80'
-              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300 shadow-2xs'
-          }`}
-          title="Quick Help & Shortcuts"
+          className="btn btn-outline-info btn-sm"
+          title="User Guide & Keyboard Shortcuts (? or H)"
         >
           <FontAwesomeIcon icon={faCircleQuestion} className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Guide</span>
         </button>
 
         {/* Official GitHub Repository Link */}
@@ -430,11 +487,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           id="btn-github-link"
-          className={`p-1.5 rounded-lg border transition-colors flex items-center justify-center ${
-            isDark
-              ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700/80'
-              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border-slate-300 shadow-2xs'
-          }`}
+          className="btn btn-outline-secondary btn-sm btn-icon"
           title="LogixFlow on GitHub (https://github.com/ktesla39/LogixFlow)"
         >
           <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">

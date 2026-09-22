@@ -1,0 +1,6 @@
+{
+  "name": "LogixFlow",
+  "description": "Interactive digital logic and electric circuit simulator and algorithm flowchart studio with real-time signal propagation, SPICE-style analog analysis, Altium-grade EDA tools, multi-sheet projects, and .json/.svg export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
